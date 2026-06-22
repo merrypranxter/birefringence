@@ -5,7 +5,7 @@
 float getThickness(vec2 uv, float time) {
   vec2 p = uv * 2.0 - 1.0;
   float r = length(p);
-  float a = atan(p.y, p.x);
+  float a = atan(p.y, p.x + 1e-6);
 
   float arms = 6.0;
   float branch = sin(a * arms + r * 12.0) * 0.5 + 0.5;

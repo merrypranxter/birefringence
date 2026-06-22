@@ -148,8 +148,14 @@ async function main() {
     height = Math.floor(canvas.clientHeight * dpr());
     canvas.width = width;
     canvas.height = height;
-    if (gammaFBO) gl.deleteFramebuffer(gammaFBO.fbo);
-    if (colorFBO) gl.deleteFramebuffer(colorFBO.fbo);
+    if (gammaFBO) {
+      gl.deleteFramebuffer(gammaFBO.fbo);
+      gl.deleteTexture(gammaFBO.tex);
+    }
+    if (colorFBO) {
+      gl.deleteFramebuffer(colorFBO.fbo);
+      gl.deleteTexture(colorFBO.tex);
+    }
     gammaFBO = createFBO(gl, width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT, gammaFilter);
     colorFBO = createFBO(gl, width, height, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, gl.LINEAR);
   }
@@ -178,7 +184,10 @@ async function main() {
   };
 
   bindUI(ui, (key) => {
-    if (key === 'palette') paletteTex = buildRamp(gl, PALETTES[ui.palette]);
+    if (key === 'palette') {
+      gl.deleteTexture(paletteTex);
+      paletteTex = buildRamp(gl, PALETTES[ui.palette]);
+    }
   });
 
   function drawFullscreen(program) {
@@ -296,14 +305,24 @@ function bindUI(ui, onChange) {
   $('source-file').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    await window.__birefringence.source.fromImage(file);
-    ui.useSource = true;
-    $('use-source').checked = true;
+    try {
+      await window.__birefringence.source.fromImage(file);
+      ui.useSource = true;
+      $('use-source').checked = true;
+    } catch (err) {
+      console.error('Failed to load image:', err);
+      alert('Failed to load the selected image.');
+    }
   });
   $('webcam-btn').addEventListener('click', async () => {
-    await window.__birefringence.source.fromWebcam();
-    ui.useSource = true;
-    $('use-source').checked = true;
+    try {
+      await window.__birefringence.source.fromWebcam();
+      ui.useSource = true;
+      $('use-source').checked = true;
+    } catch (err) {
+      console.error('Failed to acquire webcam:', err);
+      alert('Could not access webcam. Please check permissions.');
+    }
   });
   $('use-source').addEventListener('change', (e) => { ui.useSource = e.target.checked; });
   $('source-mix').addEventListener('input', (e) => { ui.sourceMix = Number(e.target.value); });

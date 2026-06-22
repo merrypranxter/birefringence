@@ -49,24 +49,33 @@ const LAMBDA_MAX = 780;
 
 export const MAX_RETARDANCE_DEFAULT = 5500; // nm, ~order 8
 
-// Spectral sum: retardance Gamma (nm) -> sRGB in [0,1].
-export function retardanceToRGB(gamma) {
-  let X = 0, Y = 0, Z = 0, yIntegral = 0;
+// lambda is static across all gamma values, so the CIE samples and the
+// y-bar normalization integral only need to be computed once.
+const CIE_SAMPLES = (() => {
+  const samples = [];
   const step = (LAMBDA_MAX - LAMBDA_MIN) / N_SAMPLES;
   for (let i = 0; i < N_SAMPLES; i++) {
     const lambda = LAMBDA_MIN + (i + 0.5) * step;
-    const s = Math.sin((Math.PI * gamma) / lambda);
-    const intensity = s * s;
     const [x, y, z] = cieMatch(lambda);
-    X += intensity * x;
-    Y += intensity * y;
-    Z += intensity * z;
-    yIntegral += y;
+    samples.push({ lambda, x, y, z });
   }
-  X /= yIntegral;
-  Y /= yIntegral;
-  Z /= yIntegral;
-  return xyzToSrgb(X, Y, Z);
+  return samples;
+})();
+
+const Y_INTEGRAL = CIE_SAMPLES.reduce((sum, s) => sum + s.y, 0);
+
+// Spectral sum: retardance Gamma (nm) -> sRGB in [0,1].
+export function retardanceToRGB(gamma) {
+  let X = 0, Y = 0, Z = 0;
+  for (let i = 0; i < N_SAMPLES; i++) {
+    const sample = CIE_SAMPLES[i];
+    const s = Math.sin((Math.PI * gamma) / sample.lambda);
+    const intensity = s * s;
+    X += intensity * sample.x;
+    Y += intensity * sample.y;
+    Z += intensity * sample.z;
+  }
+  return xyzToSrgb(X / Y_INTEGRAL, Y / Y_INTEGRAL, Z / Y_INTEGRAL);
 }
 
 // Bakes the spectral sum into a 1px-tall RGBA8 LUT texture covering

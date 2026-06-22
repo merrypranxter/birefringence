@@ -40,10 +40,12 @@ void main() {
 
   vec3 color = base + bloom(uv, texel) * u_bloomStrength;
 
-  float gN = texture(u_gammaTex, uv).r;
-  float gE = texture(u_gammaTex, uv + vec2(texel.x, 0.0)).r;
-  float gS = texture(u_gammaTex, uv + vec2(0.0, texel.y)).r;
-  vec3 normal = normalize(vec3((gN - gE) * 0.02, (gN - gS) * 0.02, 1.0));
+  // use normalized thickness (.g), not retardance (.r) — surface finish
+  // should be independent of the retardance_scale/order sliders
+  float gN = texture(u_gammaTex, uv).g;
+  float gE = texture(u_gammaTex, uv + vec2(texel.x, 0.0)).g;
+  float gS = texture(u_gammaTex, uv + vec2(0.0, texel.y)).g;
+  vec3 normal = normalize(vec3((gN - gE) * 10.0, (gN - gS) * 10.0, 1.0));
   vec3 lightDir = normalize(vec3(0.4, 0.6, 0.7));
   float spec = pow(max(dot(normal, lightDir), 0.0), 24.0);
   color += spec * u_specularStrength;

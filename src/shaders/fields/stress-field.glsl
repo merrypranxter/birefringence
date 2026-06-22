@@ -7,7 +7,7 @@
 float loadStress(vec2 p, vec2 loadPos, float strength) {
   vec2 d = p - loadPos;
   float r = length(d) + 0.025;
-  float theta = atan(d.y, d.x);
+  float theta = atan(d.y, d.x + 1e-6);
   return strength * cos(2.0 * theta) / r;
 }
 
