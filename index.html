@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>birefringence — Michel-Lévy colors</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; overflow: hidden; background: #000; height: 100%; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+
+  #panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: 280px;
+    max-height: 100vh;
+    overflow-y: auto;
+    background: rgba(10, 10, 14, 0.82);
+    color: #e8e8f0;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    padding: 16px;
+    backdrop-filter: blur(6px);
+    border-left: 1px solid #2a2a35;
+  }
+  #panel h1 {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+    color: #ff006e;
+  }
+  #panel .tagline { color: #888; margin: 0 0 16px; font-size: 11px; }
+  #panel fieldset {
+    border: 1px solid #2a2a35;
+    border-radius: 6px;
+    margin: 0 0 12px;
+    padding: 8px 10px 10px;
+  }
+  #panel legend {
+    color: #4cc9f0;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 4px;
+  }
+  #panel label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 6px 0;
+  }
+  #panel input[type="range"] { flex: 1; }
+  #panel select, #panel input[type="file"] {
+    width: 100%;
+    background: #14141c;
+    color: #e8e8f0;
+    border: 1px solid #2a2a35;
+    border-radius: 4px;
+    padding: 4px;
+  }
+  #panel button {
+    width: 100%;
+    background: #1a1a24;
+    color: #e8e8f0;
+    border: 1px solid #3a3a48;
+    border-radius: 4px;
+    padding: 6px;
+    margin: 4px 0;
+    cursor: pointer;
+  }
+  #panel button:hover { border-color: #ff006e; }
+  .val { color: #ffbe0b; min-width: 3.5em; text-align: right; }
+</style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div id="panel">
+    <h1>birefringence</h1>
+    <p class="tagline">crossed-polarizer interference colors</p>
+
+    <fieldset>
+      <legend>field</legend>
+      <label>source
+        <select id="field-source">
+          <option value="stress_field">photoelastic stress</option>
+          <option value="crystal_thickness">mineral thin-section</option>
+          <option value="cellophane_layers">cellophane mondrian</option>
+          <option value="ice_dendrite">sugar / ice crystal</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>optics</legend>
+      <label>retardance (nm)
+        <input type="range" id="retardance-scale" min="0" max="5000" step="10" value="900">
+        <span class="val" id="retardance-scale-val">900</span>
+      </label>
+      <label>order
+        <input type="range" id="order" min="1" max="8" step="1" value="2">
+        <span class="val" id="order-val">2</span>
+      </label>
+      <label>analyzer angle
+        <input type="range" id="analyzer-angle" min="0" max="90" step="1" value="45">
+        <span class="val" id="analyzer-angle-val">45°</span>
+      </label>
+      <label>auto-rotate analyzer
+        <input type="checkbox" id="auto-rotate">
+      </label>
+      <label>wave plate
+        <select id="wave-plate">
+          <option value="none">none</option>
+          <option value="full">full-wave</option>
+          <option value="quarter">quarter-wave</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>u_source (bonus)</legend>
+      <label>use source
+        <input type="checkbox" id="use-source">
+      </label>
+      <input type="file" id="source-file" accept="image/*">
+      <button id="webcam-btn">use webcam</button>
+      <button id="clear-source">clear source</button>
+      <label>source mix
+        <input type="range" id="source-mix" min="0" max="1" step="0.01" value="0.7">
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>finish</legend>
+      <label>bloom
+        <input type="range" id="bloom" min="0" max="2" step="0.01" value="0.6">
+      </label>
+      <label>specular
+        <input type="range" id="specular" min="0" max="2" step="0.01" value="0.4">
+      </label>
+      <label>stylize mix
+        <input type="range" id="stylize" min="0" max="1" step="0.01" value="0">
+      </label>
+      <label>palette
+        <select id="palette">
+          <option value="acid">acid</option>
+          <option value="void_bloom">void_bloom</option>
+          <option value="plasma">plasma</option>
+        </select>
+      </label>
+    </fieldset>
+  </div>
+
+  <script src="src/js/main.js" type="module"></script>
+</body>
+</html>

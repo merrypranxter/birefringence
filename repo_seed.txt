@@ -1,0 +1,97 @@
+# birefringence
+
+> crossed-polarizer interference colors. a birefringent material retards light by thickness × Δn; between crossed polarizers that retardance becomes michel-lévy interference color. photoelastic stress rainbows, mineral thin-sections, cellophane, sugar crystals. rainbow-mathy.
+
+**Type:** GENERATOR (retardance field → spectral interference). Bonus: read `u_source` luminance as a thickness field.
+
+## The Math
+
+retardance: `Γ = thickness · Δn`. the retardance is the optical path difference between the two polarization axes. `Δn` is the birefringence (difference in refractive index). `thickness` is the physical thickness of the material. the unit is nanometers.
+
+Michel-Lévy interference: transmitted intensity per wavelength `I(λ) = sin²(π · Γ / λ)`. the intensity is zero when `Γ = m·λ` (integer orders) and maximum when `Γ = (m + 0.5)·λ`. the color is the sum of `I(λ)` weighted by the source spectrum and the eye's RGB response. implement as a spectral sum or a LUT via `michel-levy.js`.
+
+crossed polarizers: the background is black. the analyzer is at 90° to the polarizer. only the retarded light leaks through. `transmitted = sin²(π · Γ / λ) · sin²(2θ)` where `θ` is the angle between the retarder axis and the polarizer. for simplicity, assume `θ = 45°` (max transmission).
+
+analyzer rotation: rotating the analyzer changes the effective retardance. `I(λ, φ) = sin²(π · Γ / λ) · sin²(2(θ - φ))`. the whole color palette shifts with `φ`. this is the interactive magic. expose it as a parameter. `φ` from 0° to 90° cycles through all possible colors.
+
+full-wave plate: adds a constant offset to the retardance. `Γ_effective = Γ + λ/2`. the color order shifts. the first-order red becomes second-order blue. the full-wave plate is the palette shifter.
+
+spectral sum to RGB: sample the visible spectrum at `N=64` points (380nm to 780nm). compute `I(λ)` for each. multiply by CIE XYZ color-matching functions. convert XYZ → RGB. this is the physically correct color. a LUT is faster; the spectral sum is more accurate.
+
+## The Art
+
+**photoelastic_stress** — stressed bracket or crack, black crossed-pol field, stress rainbows. the stress field is a 2D function from point loads. `σ_xx - σ_yy` is the retardance proxy. the stress fringes are the Michel-Lévy orders: black, gray, white, yellow, red, blue, green, yellow... the orders are the signature. the image is a engineering photograph from the 1960s.
+
+**mineral_thin_section** — random crystalline domains, varying thickness/orientation. each domain is a different color. the boundaries are sharp. the colors are the Michel-Lévy orders: low-order yellows and reds, high-order greens and blues. the image is a geology slide under crossed polars. `retardance_scale = 1200nm`, `order = 3`. the domains are random, the colors are ordered.
+
+**cellophane_mondrian** — flat stacked regions, each adds retardance. the regions are rectangles, triangles, circles. each region is a uniform color. the analyzer rotation cycles the palette: red → blue → green → yellow → red. the image is a Mondrian that breathes. `analyzer_angle = time * 0.1`. the rotation is the animation.
+
+**sugar_crystal** — radial thickness, fine high-order fringes. the crystal grows from a center, the thickness increases with radius. the fringes are fine, the colors are high-order pastels. the image is a sugar crystal under a microscope. `retardance_scale = 3000nm`, `order = 8`. the fringes are the growth rings.
+
+## File Tree
+
+```
+birefringence/
+├── README.md
+├── repo_seed.txt
+├── context.manifest.json
+├── .gitignore
+├── index.html
+├── src/
+│ ├── js/
+│ │ ├── main.js
+│ │ ├── michel-levy.js
+│ │ └── color-maps.js
+│ └── shaders/
+│ ├── fields/
+│ │ ├── stress-field.glsl
+│ │ ├── crystal-thickness.glsl
+│ │ ├── cellophane-layers.glsl
+│ │ └── ice-dendrite.glsl
+│ ├── retardance.frag
+│ ├── interference.frag
+│ └── post-process.frag
+└── docs/
+ ├── math-reference.md
+ └── visual-targets.md
+```
+
+## Engines (Retardance-Field Sources)
+
+- **stress-field** — photoelastic: 2D stress from point loads / cracks → retardance ∝ stress difference → screaming stress fringes.
+- **crystal-thickness** — random crystalline domains, varying thickness/orientation (mineral thin-section / sugar).
+- **cellophane-layers** — flat stacked regions, each adds retardance (rainbow Mondrian).
+- **ice-dendrite** — crystallizing thickness field.
+
+## Pipeline
+
+1. **retardance.frag** — build retardance field `Γ = thickness · Δn`.
+2. **interference.frag** — the core: transmitted intensity per wavelength `I(λ) = sin²(π·Γ/λ)`; sum across visible spectrum (or LUT via `michel-levy.js`) → RGB; modulate by polarizer/analyzer angle.
+3. **Analyzer rotation** animates the whole palette (the interactive magic). Full-wave plate offsets the color order.
+4. **post** — glassy specular, slight bloom.
+
+## Parameters
+
+- `field_source`: stress_field | crystal_thickness | cellophane_layers | ice_dendrite
+- `retardance_scale`: 0–5000 nm (scales thickness → color order)
+- `analyzer_angle`: 0°–90° (rotates the whole palette)
+- `wave_plate`: none | full | quarter (offsets color order)
+- `order`: 1–8 (Michel-Lévy order, affects fringe fineness)
+
+## Palette
+
+Generated by the Michel-Lévy spectral sum — *do not* hand-pick; it emerges from `sin²(πΓ/λ)`. Background is black (crossed polarizers extinguish).
+- The spectral sum produces: black → gray → white → yellow → orange → red → blue → green → yellow (first order)
+- Higher orders produce pastel fringes
+- The palette is physics, not design
+
+## Gotchas
+
+- color is **spectral interference** `sin²(πΓ/λ)` integrated to RGB — implement the Michel-Lévy mapping (function or LUT), not a hue ramp.
+- crossed polarizers = black field with colored stress only.
+- analyzer rotation is the toy — expose it.
+- full-wave plate shifts the color order by λ/2.
+
+## Ecosystem Hooks
+
+Shares spectral-color logic with `thin_film_iridescence`, `structural_color`. Pairs with `crystalline`, `minerals`, `op_art_style`. Rainbow-weird.

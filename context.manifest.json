@@ -1,0 +1,29 @@
+{
+  "name": "birefringence",
+  "type": "GENERATOR",
+  "title": "Birefringence — Michel-Lévy Colors",
+  "brief": "Crossed-polarizer interference colors. Retardance field Γ=thickness·Δn → sin²(πΓ/λ) spectral sum → RGB. Photoelastic stress, mineral thin-sections, cellophane, sugar crystals. Analyzer rotation cycles the palette.",
+  "inputs": [
+    "u_source"
+  ],
+  "outputs": [
+    "interference_image"
+  ],
+  "tags": [
+    "generator",
+    "optics",
+    "interference",
+    "spectral",
+    "physics",
+    "rainbow"
+  ],
+  "adjacency": [
+    "thin_film_iridescence",
+    "structural_color",
+    "crystalline",
+    "minerals",
+    "op_art_style"
+  ],
+  "status": "active",
+  "batch": "B"
+}
